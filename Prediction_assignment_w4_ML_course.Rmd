@@ -1,0 +1,85 @@
+---
+title: "Peer-graded Assignment: Prediction Assignment Writeup"
+author: "Thanida Prasert"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement – a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it. In this project, your goal will be to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways.
+
+
+More information is available from the website here: http://groupware.les.inf.puc-rio.br/har.
+
+## Data Source
+
+The training and test data for this project are collected using the link below:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
+
+The data for this project come from this source: http://groupware.les.inf.puc-rio.br/har.
+
+The full reference of this data is as follows:
+
+Velloso, E.; Bulling, A.; Gellersen, H.; Ugulino, W.; Fuks, H. “Qualitative Activity Recognition of Weight Lifting Exercises. Proceedings of 4th International Conference in Cooperation with SIGCHI (Augmented Human ’13)”. Stuttgart, Germany: ACM SIGCHI, 2013.
+
+## Loading and Cleaning of Data
+set working directory.
+
+```{r }
+setwd("~/course project on R (coursera)/")
+```
+
+
+Load required R packages and set seed.
+```{r }
+library(lattice)
+library(ggplot2)
+library(caret)
+library(rpart)
+
+
+set.seed(222)
+```
+
+
+Load data for training and test datasets.
+```{r}
+url_train <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+url_quiz  <- "http://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+
+data_train <- read.csv(url(url_train), strip.white = TRUE, na.strings = c("NA",""))
+data_quiz  <- read.csv(url(url_quiz),  strip.white = TRUE, na.strings = c("NA",""))
+
+dim(data_train)
+```
+
+```{r}
+dim(data_quiz)
+```
+
+
+Create two partitions(75% & 25%) within the original training dataset.
+```{r}
+in_train  <- createDataPartition(data_train$classe, p=0.75, list=FALSE)
+train_set <- data_train[ in_train, ]
+test_set  <- data_train[-in_train, ]
+
+dim(train_set)
+```
+
+
+```{r}
+dim(test_set)
+```
+
+The two datasets (***train_set*** and ***test_set***) have a large number of NA values as well as near-zero-variance (NZV) variables. Both will be removed together with their ID variables.
+
+
